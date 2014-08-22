@@ -1,0 +1,15 @@
+Makefile
+Makefile.in
+aclocal.m4
+autom4te.cache/
+build/
+config.h
+config.h.in
+config.log
+config.status
+src/.deps/
+src/.dirstamp
+src/bdf_parser/.dep/
+src/bdf_parser/.dirstamp
+stamp-h1
+.deps
