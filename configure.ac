@@ -8,4 +8,5 @@ AM_INIT_AUTOMAKE([1.11 -Wall -Werror subdir-objects foreign])
 AC_CONFIG_FILES([Makefile])
 #: ${CFLAGS="-O2 -std=c11 -Wall "}
 AC_PROG_CC
+AM_PROG_CC_C_O
 AC_OUTPUT
