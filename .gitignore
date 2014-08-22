@@ -13,3 +13,6 @@ src/bdf_parser/.dep/
 src/bdf_parser/.dirstamp
 stamp-h1
 .deps
+*.o
+lib_tiny_font
+lib_tiny_font-0.01.tar.gz
