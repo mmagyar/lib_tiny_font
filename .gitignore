@@ -13,3 +13,5 @@ stamp-h1
 *.o
 lib_tiny_font
 lib_tiny_font-0.01.tar.gz
+config.h.in~
+
