@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include "../font_struct.h"
+bool strequ_f(const char*,const char* );
 int read_file(char * const);
 
 #endif

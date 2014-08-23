@@ -40,36 +40,33 @@ int read_file(char*   const file_name)
             break;
 
         }
+
         if(strequ_f(reader,"STARTFONT ")) {
             printf(reader);
         } else if(strequ_f(reader,"COMMENT ")) {
             printf(reader);
-        } else if(!strncmp(reader,"CONTENTVERSION",12)) {
+        } else if(strequ_f(reader,"CONTENTVERSION")) {
             printf(reader);
-        } else if(!strncmp(reader,"FONT ",5)) {
+        } else if(strequ_f(reader,"FONT ")) {
             printf(reader);
-        } else if(!strncmp(reader,"SIZE ",5)) {
+        } else if(strequ_f(reader,"SIZE ")) {
             printf(reader);
-        } else if(!strncmp(reader,"METRICSSET ",11)) {
+        } else if(strequ_f(reader,"METRICSSET ")) {
             printf(reader);
-        }
-
-        else if(!strncmp(reader,"METRICSSET ",11)) {
+        } else if(strequ_f(reader,"METRICSSET ")) {
             printf(reader);
-        }
-
-        else if(!strncmp(reader,"METRICSSET ",11)) {
+        } else if(strequ_f(reader,"METRICSSET ")) {
             printf(reader);
         }
 
 
-        else         if(!strncmp(reader,"FONTBOUNDINGBOX",15)) {        }
-        else if(!strncmp(reader,"PIXEL_SIZE",10)) {}
-        else if(!strncmp(reader,"STARTCHAR",9)) {}
-        else if(!strncmp(reader,"ENCODING",8)) {}
-        else if(!strncmp(reader,"BBX",3)) {}
-        else if(!strncmp(reader,"BITMAP",6)) {}
-        else if(!strncmp(reader,"ENDCHAR",7)) {}
+        else         if(strequ_f(reader,"FONTBOUNDINGBOX")) {        }
+        else if(strequ_f(reader,"PIXEL_SIZE")) {}
+        else if(strequ_f(reader,"STARTCHAR")) {}
+        else if(strequ_f(reader,"ENCODING")) {}
+        else if(strequ_f(reader,"BBX")) {}
+        else if(strequ_f(reader,"BITMAP")) {}
+        else if(strequ_f(reader,"ENDCHAR")) {}
         else {
             //printf("n");
         }

@@ -4,4 +4,5 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "bdf_parser/bdf_parser.h"
+#include "font_struct.h"
 #endif

@@ -16,3 +16,4 @@ lib_tiny_font-0.01.tar.gz
 config.h.in~
 *.cbp
 *.depend
+*.layout
