@@ -21,118 +21,189 @@ bool strequ_f(const char* string1, const char* string2)
 
     return false;
 }
+#define assign_to_num_check(x,y) if((y) !=NULL){x=atoi(y);}
+int parse_desc(font_common* fc,char** parts, size_t parts_size)
+{
+    if(parts_size <1) {
+        return -1;
+    }
+
+    if(strequ_f(parts[0],"STARTFONT ")) {
+        //Font version number,  number
+    } else if(strequ_f(parts[0],"COMMENT ")) {
+        //Font comment, string
+    } else if(strequ_f(parts[0],"CONTENTVERSION")) {
+        //Font version integer
+    } else if(strequ_f(parts[0],"FONT ")) {
+        //Font name, string
+    } else if(strequ_f(parts[0],"SIZE ")) {
+        //Point size with X x Y res outputin format of (int int int)
+        assign_to_num_check(fc->points, parts[1]);
+//        fc->points =  parts[1]!=NULL? atoi(parts[1]):size;
+//        res_x = parts[2]!=NULL? atoi(parts[2]):size;
+//        res_y = parts[3]!=NULL? atoi(parts[3]):size;
+
+    } else if(strequ_f(parts[0],"FONTBOUNDINGBOX")) {
+        //bounding box of the Font w,h, offset w and h (int int int int)
+        assign_to_num_check(fc->width, parts[1]);
+        assign_to_num_check(fc->height, parts[2]);
+        assign_to_num_check(fc->offset_x, parts[3]);
+        assign_to_num_check(fc->offset_y, parts[4]);
+//        fc->width    = parts[1]!=NULL? atoi(parts[1]):size;
+//        fc->height   = parts[2]!=NULL? atoi(parts[2]):size;
+//        fc->offset_x = parts[3]!=NULL? atoi(parts[3]):size;
+//        fc->offest_y = parts[4]!=NULL? atoi(parts[4]):size;
+        printf("parts size %d \n",parts_size);
+    } else if(strequ_f(parts[0],"METRICSSET ")) {
+        //optional
+    } else if(strequ_f(parts[0],"STARTPROPERTIES  ")) {
+        //int , noting the number of following lines,properties, optional
+
+    } else if(strequ_f(parts[0],"PIXEL_SIZE")) {
+    } else if(strequ_f(parts[0],"ENDPROPERTIES ")) {
+        //end of properties list
+
+
+    }
+    return 0;
+}
+int set_font_line_from_hex_string(
+    font_common* fc, font_type_basic* ftb,char* n,int cur_y)
+{
+    size_t cur_x=0;
+    for(size_t cursor = 0; n[cursor]!= '\0'&& n[cursor]!= '\n'; cursor++) {
+        char stubb[2] = {n[cursor],'\0'};
+        uint8_t bits4 = strtol(stubb,NULL,16);
+        int pxs[4]= {bits4>>3 &1,bits4>>2 &1,bits4>>1 &1,bits4 &1};
+        for(int i=0; i<4; i++) {
+            font_bit_set(fc,ftb,cur_x++,cur_y,pxs[i]);
+        }
+    }
+
+    return 0;
+}
 int read_file(char*   const file_name)
 {
     FILE* f = fopen(file_name,"r");
     int const READ_BUFFER_ELEMENTS = 1000;
-    // int const READ_BUFFER_SIZE = READ_BUFFER_ELEMENTS* READ_DATA_SIZE;
-    //char * const reader = malloc(READ_DATA_SIZE*READ_BUFFER_ELEMENTS);
     char reader[READ_BUFFER_ELEMENTS];
 
+    int charnum = 0;
+    int processed_charnum = 0;
+
+    int const MAX_PARTS = 10,PARTS_BUFFER_LENGTH=128;
+    char** parts = malloc(sizeof(char*)*MAX_PARTS);
+    for(int i= 0 ; i< MAX_PARTS; i++) {
+        parts[i] = malloc(sizeof(char)*PARTS_BUFFER_LENGTH);
+    }
+
+    int const READ_UP_TO=128;
+    font_type_basic** basic = malloc(sizeof(font_type_basic)*READ_UP_TO);
+     for(int i= 0; i < READ_UP_TO;i++) basic[i]=NULL;
+//Parsing state start
+    bool parsingBitmap=false;
+    size_t cur_y=0;
+    bool parsingTypes =false;
+    uint32_t current_char = 0;
+//Parsing state end
+//Font info start
+    font_common* fc = font_common_new(12,6);
+//Font info end
+    int ii=0;
     while(1) {
 
         if(fgets(reader,READ_BUFFER_ELEMENTS,f)==NULL) {
             if(feof(f)!= 0) {
                 printf("\nEnd of file has been reached\n");
             } else if(ferror(f)!=0) {
-                printf("\nAn error occured during  file read");
+                printf("\nAn error occurred during  file read");
             }
             break;
 
         }
-
-        if(strequ_f(reader,"STARTFONT ")) {
-            printf(reader);
-        } else if(strequ_f(reader,"COMMENT ")) {
-            printf(reader);
-        } else if(strequ_f(reader,"CONTENTVERSION")) {
-            printf(reader);
-        } else if(strequ_f(reader,"FONT ")) {
-            printf(reader);
-        } else if(strequ_f(reader,"SIZE ")) {
-            printf(reader);
-        } else if(strequ_f(reader,"METRICSSET ")) {
-            printf(reader);
-        } else if(strequ_f(reader,"METRICSSET ")) {
-            printf(reader);
-        } else if(strequ_f(reader,"METRICSSET ")) {
-            printf(reader);
+        //Break the string into bits
+        int parts_num=0;
+        for(char* part = strtok(reader," ");
+                parts_num<MAX_PARTS && part!=NULL ; parts_num++) {
+            strncpy(parts[parts_num],part,PARTS_BUFFER_LENGTH);
+            parts[parts_num][PARTS_BUFFER_LENGTH-1]='\0';
+            part = strtok(NULL," ");
         }
 
 
-        else         if(strequ_f(reader,"FONTBOUNDINGBOX")) {        }
-        else if(strequ_f(reader,"PIXEL_SIZE")) {}
-        else if(strequ_f(reader,"STARTCHAR")) {}
-        else if(strequ_f(reader,"ENCODING")) {}
-        else if(strequ_f(reader,"BBX")) {}
-        else if(strequ_f(reader,"BITMAP")) {}
-        else if(strequ_f(reader,"ENDCHAR")) {}
-        else {
-            //printf("n");
+        if(parsingTypes || (strequ_f(parts[0],"STARTCHAR "))) {
+            parsingTypes =true;
+            if(parsingBitmap) {
+                if(strequ_f(parts[0],"ENDCHAR")) {
+                    parsingBitmap=false;
+                } else {
+                    if(current_char == 109) {
+                        set_font_line_from_hex_string(
+                            fc,basic[current_char],parts[0],cur_y);
+                        cur_y++;
+
+                    }
+                }
+
+            } else  if(strequ_f(parts[0],"CHARS ")) {
+                //int, The number of characters in this font
+            } else if(strequ_f(parts[0],"STARTCHAR ")) {
+                charnum++;
+                //string, containing the name, start of a character
+            } else if(strequ_f(parts[0],"ENCODING ")) {
+                //Positive == Adobe standard encoding
+                assign_to_num_check(current_char,parts[1]);
+                if(current_char < READ_UP_TO) {
+                    basic[current_char] = font_type_basic_new(fc,current_char);
+                    processed_charnum++;
+                }
+            } else if(strequ_f(parts[0],"SWIDTH ")) {
+                //Scale-able width, not really interesting for us
+            } else if(strequ_f(parts[0],"DWIDTH ")) {
+                //Mandatory for encoding 0, width in pixels
+            } else if(strequ_f(parts[0],"SWIDTH1 ")) {
+                //This should be only present with encoding 1 || 2
+            } else if(strequ_f(parts[0],"DWIDTH1 ")) {
+                //This should be only present with encoding 1 || 2
+            } else if(strequ_f(parts[0],"VVECTOR ")) {
+                //Optional
+            } else if(strequ_f(parts[0],"BBX ")) {
+                //(int int int int) width and height of black pixels,
+                // and their offsets
+            } else if(strequ_f(parts[0],"BITMAP")) {
+                //start parsing bitmap
+                parsingBitmap=true;
+                cur_y=0;
+            } else if(strequ_f(parts[0],"ENDCHAR")) {
+                //ends the character description
+                parsingBitmap=false;
+            } else if(strequ_f(parts[0],"ENDFONT")) {
+                //Terminates the file
+            } else {
+                printf("not handled %s",parts [0]);
+            }
+        } else {
+            parse_desc(fc,parts,parts_num);
         }
-        /*
-        switch (lineSplit[0]) {
-        case "FONTBOUNDINGBOX":
-            // Out.log("FONT: " + lineSplit[1]);
-            box = lineSplit[1].split(" ");
-            width = Integer.parseInt(box[0]);
-            height = Integer.parseInt(box[1]);
-            offX = Integer.parseInt(box[2]);
-            offY = Integer.parseInt(box[3]);
-            break;
-        case "PIXEL_SIZE":
-            size = Integer.parseInt(lineSplit[1]);
-            break;
-        case "STARTCHAR":
-            if (readingChar || readingCharBitmap)
-                Out.error("ERROR char started before previveous enden.");
-            readingChar = true;
-            // thisCharName = lineSplit[1];
-        break;
-        case "ENCODING":
-        thisCharCode = Integer.parseInt(lineSplit[1]);
-        break;
-        case "BBX":
-        box = lineSplit[1].split(" ");
-        cW = Integer.parseInt(box[0]);
-        cH = Integer.parseInt(box[1]);
-        cX = Integer.parseInt(box[2]);
-        cY = Integer.parseInt(box[3]);
-        break;
-        case "BITMAP":
-        if(readingChar)
-        {
-            readingCharBitmap = true;
-        } else
-        { Out.error("Error while Parsing, No STARTCHAR before BITMAP"); }
-        lineArray = new long[cH];
-        lineCounter = 0;
-        break;
 
-        case "ENDCHAR":
-        if(!(readingChar && readingCharBitmap))
-        {
-            Out.error("ERROR, char ended before it was started");
-        }
-        readingChar = false;
-        readingCharBitmap = false;
-        // Out.log("   " + thisCharName + ": " + (char) thisCharCode + " Size: " + cW + " : " + cH);
-
-            Font newFont = new Font(cW, cH, cX, cY, (char) thisCharCode, lineArray);
-            types.put(newFont.charachter, newFont);
-
-            // Out.log(String.format("0x%8s", Long.toHexString(lng)).replace(' ', '0'));
-
-            break;
-        default:
-            if (readingChar && readingCharBitmap)
-                lineArray[lineCounter++] = Long.parseLong(line, 16);
-            break
-        */
-        //        printf(reader);
 
     }
 
     fclose(f);
+    printf("lines of bitmap: %d",ii);
+    printf("parsed %d fonts, processed fonts: %d\n",charnum,processed_charnum);
+    font_common_print(fc);
+    font_type_basic_print_stdout(fc,basic[109]);
+
+    for(int i =0; i < READ_UP_TO;i++){
+            font_type_basic_delete(fc,basic[i]);
+    }
+    free(basic);
+//    printf("target resolution x : %d y : %d\n",res_x,res_y);
+    for(int i = 0 ; i <MAX_PARTS; i++) {
+        free(parts[i]);
+    }
+    free(parts);
+    font_common_delete(fc);
     return 0;
 }
