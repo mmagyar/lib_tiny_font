@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <stdint.h>
+#include <string.h>
 
 /** \brief Must be used with the supplied constructor and deconstruct method
  */
@@ -17,7 +18,7 @@ typedef struct font_common {
 /** \brief Must be used with the supplied constructor and deconstruct method
  */
 typedef struct font_type_basic {
-    const char character;
+    char character;
     /**Start of line, the exact size is set by font_common struct
     The stored data is always raw bits corresponding to pixels*/
     unsigned char* lines;

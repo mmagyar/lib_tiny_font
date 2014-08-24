@@ -17,3 +17,13 @@ config.h.in~
 *.cbp
 *.depend
 *.layout
+
+.anjuta/
+.anjuta_sym_db.db
+Makefile.in
+aclocal.m4
+config.h.in
+configure
+lib_tiny_font.anjuta
+*.*~
+

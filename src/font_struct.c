@@ -18,11 +18,10 @@ int font_common_delete(font_common* fc)
 }
 font_type_basic* font_type_basic_new(font_common* common,const char corr_char)
 {
-    font_type_basic init = {corr_char,
-                            malloc(sizeof(char)*common->pixels_num)
-                           };
+    
     font_type_basic* ftb = malloc(sizeof(font_type_basic));
-    memcpy(ftb, &init , sizeof(ftb));
+    ftb->character=corr_char;
+    ftb->lines=malloc(sizeof(char)*common->pixels_num);
 
     return ftb;
 }
