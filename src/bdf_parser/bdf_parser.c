@@ -99,7 +99,9 @@ int read_file(char*   const file_name)
 
     int const READ_UP_TO=128;
     font_type_basic** basic = malloc(sizeof(font_type_basic)*READ_UP_TO);
-     for(int i= 0; i < READ_UP_TO;i++) basic[i]=NULL;
+    for(int i= 0; i < READ_UP_TO; i++) {
+        basic[i]=NULL;
+    }
 //Parsing state start
     bool parsingBitmap=false;
     size_t cur_y=0;
@@ -136,13 +138,10 @@ int read_file(char*   const file_name)
             if(parsingBitmap) {
                 if(strequ_f(parts[0],"ENDCHAR")) {
                     parsingBitmap=false;
-                } else {
-                    if(current_char == 109) {
-                        set_font_line_from_hex_string(
-                            fc,basic[current_char],parts[0],cur_y);
-                        cur_y++;
-
-                    }
+                } else if(current_char <READ_UP_TO){
+                    set_font_line_from_hex_string(
+                        fc,basic[current_char],parts[0],cur_y);
+                    cur_y++;
                 }
 
             } else  if(strequ_f(parts[0],"CHARS ")) {
@@ -193,10 +192,10 @@ int read_file(char*   const file_name)
     printf("lines of bitmap: %d",ii);
     printf("parsed %d fonts, processed fonts: %d\n",charnum,processed_charnum);
     font_common_print(fc);
-    font_type_basic_print_stdout(fc,basic[109]);
-
-    for(int i =0; i < READ_UP_TO;i++){
-            font_type_basic_delete(fc,basic[i]);
+    font_type_basic_print_stdout(fc,basic['m']);
+    font_type_basic_print_stdout(fc,basic['a']);
+    for(int i =0; i < READ_UP_TO; i++) {
+        font_type_basic_delete(fc,basic[i]);
     }
     free(basic);
 //    printf("target resolution x : %d y : %d\n",res_x,res_y);
