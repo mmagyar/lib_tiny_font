@@ -12,18 +12,21 @@
 typedef struct font_common {
     size_t width; /**pixels, means bits*/
     size_t height;
+    size_t points;
+    signed int offset_x;
+    signed int offset_y;
     size_t pixels_num;
 } font_common;
 
 /** \brief Must be used with the supplied constructor and deconstruct method
  */
 typedef struct font_type_basic {
-    char character;
+    uint32_t character;
     /**Start of line, the exact size is set by font_common struct
     The stored data is always raw bits corresponding to pixels*/
     unsigned char* lines;
 } font_type_basic;
-
+void font_common_print(font_common * fc);
 /** \brief Create and initialize font_common structure
  *
  * \param width size_t  maximum width of any single character

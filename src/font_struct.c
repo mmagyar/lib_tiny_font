@@ -8,6 +8,11 @@ font_common* font_common_new(size_t width,size_t height)
     fc->pixels_num = width*height;
     return fc;
 }
+void font_common_print(font_common* fc)
+{
+    printf("font metrics: size: %d width %d height %d offset x %d offset y %d\n",
+           fc->points,fc->width,fc->height,fc->offset_x,fc->offset_y);
+}
 int font_common_delete(font_common* fc)
 {
     if(fc ==NULL) {
@@ -18,7 +23,7 @@ int font_common_delete(font_common* fc)
 }
 font_type_basic* font_type_basic_new(font_common* common,const char corr_char)
 {
-    
+
     font_type_basic* ftb = malloc(sizeof(font_type_basic));
     ftb->character=corr_char;
     ftb->lines=malloc(sizeof(char)*common->pixels_num);
