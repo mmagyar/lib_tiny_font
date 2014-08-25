@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <string.h>
 
+
 /** \brief Must be used with the supplied constructor and deconstruct method
  */
 typedef struct font_common {
@@ -26,7 +27,7 @@ typedef struct font_type_basic {
     The stored data is always raw bits corresponding to pixels*/
     unsigned char* lines;
 } font_type_basic;
-void font_common_print(font_common * fc);
+void font_common_print(font_common* fc);
 /** \brief Create and initialize font_common structure
  *
  * \param width size_t  maximum width of any single character
@@ -60,8 +61,15 @@ font_type_basic* font_type_basic_new(font_common* common, const char c_char);
  * \return int non-zero on failure , 0 on success
  *
  */
-int font_type_basic_delete(font_common* common,font_type_basic* delete_this);
 
+
+int font_type_basic_delete(font_common* common,font_type_basic* delete_this);
+typedef struct font_t {
+    font_common* fc;
+    size_t types_num;
+    font_type_basic** types;
+} font_t;
+void font_t_delete(font_t* font);
 
 int font_bit_get(font_common* common ,font_type_basic* basic,
                  size_t x, size_t y);

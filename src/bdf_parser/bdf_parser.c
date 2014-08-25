@@ -39,7 +39,6 @@ int parse_desc(font_common* fc,char** parts, size_t parts_size)
     } else if(strequ_f(parts[0],"SIZE ")) {
         //Point size with X x Y res outputin format of (int int int)
         assign_to_num_check(fc->points, parts[1]);
-//        fc->points =  parts[1]!=NULL? atoi(parts[1]):size;
 //        res_x = parts[2]!=NULL? atoi(parts[2]):size;
 //        res_y = parts[3]!=NULL? atoi(parts[3]):size;
 
@@ -49,11 +48,6 @@ int parse_desc(font_common* fc,char** parts, size_t parts_size)
         assign_to_num_check(fc->height, parts[2]);
         assign_to_num_check(fc->offset_x, parts[3]);
         assign_to_num_check(fc->offset_y, parts[4]);
-//        fc->width    = parts[1]!=NULL? atoi(parts[1]):size;
-//        fc->height   = parts[2]!=NULL? atoi(parts[2]):size;
-//        fc->offset_x = parts[3]!=NULL? atoi(parts[3]):size;
-//        fc->offest_y = parts[4]!=NULL? atoi(parts[4]):size;
-        printf("parts size %d \n",parts_size);
     } else if(strequ_f(parts[0],"METRICSSET ")) {
         //optional
     } else if(strequ_f(parts[0],"STARTPROPERTIES  ")) {
@@ -82,7 +76,7 @@ int set_font_line_from_hex_string(
 
     return 0;
 }
-int read_file(char*   const file_name)
+font_t* read_file(char*   const file_name,int const UP_TO_CHAR)
 {
     FILE* f = fopen(file_name,"r");
     int const READ_BUFFER_ELEMENTS = 1000;
@@ -97,9 +91,9 @@ int read_file(char*   const file_name)
         parts[i] = malloc(sizeof(char)*PARTS_BUFFER_LENGTH);
     }
 
-    int const READ_UP_TO=128;
-    font_type_basic** basic = malloc(sizeof(font_type_basic)*READ_UP_TO);
-    for(int i= 0; i < READ_UP_TO; i++) {
+
+    font_type_basic** basic = malloc(sizeof(font_type_basic)*UP_TO_CHAR);
+    for(int i= 0; i < UP_TO_CHAR; i++) {
         basic[i]=NULL;
     }
 //Parsing state start
@@ -111,12 +105,12 @@ int read_file(char*   const file_name)
 //Font info start
     font_common* fc = font_common_new(12,6);
 //Font info end
-    int ii=0;
+
     while(1) {
 
         if(fgets(reader,READ_BUFFER_ELEMENTS,f)==NULL) {
             if(feof(f)!= 0) {
-                printf("\nEnd of file has been reached\n");
+                //printf("\nEnd of file has been reached\n");
             } else if(ferror(f)!=0) {
                 printf("\nAn error occurred during  file read");
             }
@@ -138,7 +132,7 @@ int read_file(char*   const file_name)
             if(parsingBitmap) {
                 if(strequ_f(parts[0],"ENDCHAR")) {
                     parsingBitmap=false;
-                } else if(current_char <READ_UP_TO){
+                } else if(current_char <UP_TO_CHAR) {
                     set_font_line_from_hex_string(
                         fc,basic[current_char],parts[0],cur_y);
                     cur_y++;
@@ -152,7 +146,7 @@ int read_file(char*   const file_name)
             } else if(strequ_f(parts[0],"ENCODING ")) {
                 //Positive == Adobe standard encoding
                 assign_to_num_check(current_char,parts[1]);
-                if(current_char < READ_UP_TO) {
+                if(current_char < UP_TO_CHAR) {
                     basic[current_char] = font_type_basic_new(fc,current_char);
                     processed_charnum++;
                 }
@@ -184,25 +178,22 @@ int read_file(char*   const file_name)
         } else {
             parse_desc(fc,parts,parts_num);
         }
-
-
     }
 
     fclose(f);
-    printf("lines of bitmap: %d",ii);
+
     printf("parsed %d fonts, processed fonts: %d\n",charnum,processed_charnum);
     font_common_print(fc);
-    font_type_basic_print_stdout(fc,basic['m']);
-    font_type_basic_print_stdout(fc,basic['a']);
-    for(int i =0; i < READ_UP_TO; i++) {
-        font_type_basic_delete(fc,basic[i]);
-    }
-    free(basic);
-//    printf("target resolution x : %d y : %d\n",res_x,res_y);
+
     for(int i = 0 ; i <MAX_PARTS; i++) {
         free(parts[i]);
     }
     free(parts);
-    font_common_delete(fc);
-    return 0;
+
+    font_t* font = malloc(sizeof(font_t));
+    font->fc=fc;
+    font->types_num = UP_TO_CHAR;
+    font->types = basic;
+
+    return font;
 }

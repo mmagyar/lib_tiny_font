@@ -41,7 +41,15 @@ int font_type_basic_delete(
     free(delete_this);
     return 0;
 }
-
+void font_t_delete(font_t* font)
+{
+    for(size_t i =0; i < (font->types_num); i++) {
+        font_type_basic_delete(font->fc,font->types[i]);
+    }
+    free(font->types);
+    font_common_delete(font->fc);
+    free(font);
+}
 int font_bit_get(font_common* common ,font_type_basic* basic,
                  size_t x, size_t y)
 {
